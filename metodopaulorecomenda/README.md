@@ -14,6 +14,12 @@ Next.js 16 (App Router, TypeScript) + Supabase (Auth, Postgres com RLS).
 | `/ao-vivo`, `/gravacoes`, `/gravacoes/[id]` | Lives agendadas com lembrete e gravações. |
 | `/busca?q=` | Busca nas aulas. |
 | `/sem-acesso` | Logado, mas sem matrícula ativa. |
+| `/perfil` | Nome (vai no certificado), foto e progresso. |
+| `/historico` | Aulas abertas, da mais recente para a mais antiga. |
+| `/certificado` | Liberado ao concluir todas as aulas publicadas; imprime/baixa em PDF. |
+| `/verificar/[código]` | Página pública que confirma se um certificado é autêntico. |
+| `/material/[id]` | Abre material da aula (link ou arquivo do Storage privado, com link temporário de 2 min). |
+| `/admin` | Painel admin (só `role = admin`): módulos, aulas, lives, alunos (liberar/bloquear acesso) e link da comunidade. |
 
 ## Regras de acesso (RLS)
 
@@ -50,6 +56,22 @@ Sem Supabase ainda: `DEMO_MODE=1 npm run dev` mostra a área com os dados do lay
 4. Desligar "Allow new users to sign up" (aluno entra por compra/convite).
 5. Criar o primeiro admin: convidar o e-mail em Authentication > Users e depois `update profiles set role = 'admin' where id = '<uuid>';` no SQL Editor.
 
+## Navegação
+
+Coluna lateral esquerda fixa no computador (grupos Estudar, Ao vivo, Conta + card de progresso). No celular vira menu que abre pelo botão do topo.
+
+## Aula: materiais e comentários
+
+- Materiais: links ou arquivos (até 50 MB) cadastrados pelo admin na tela da aula. Arquivos ficam no bucket privado `materiais`; só membro com acesso baixa.
+- Comentários com um nível de resposta. Sem edição; o autor apaga o próprio, a equipe apaga qualquer um.
+
+## Painel admin
+
+- Acesso: só perfis com `role = 'admin'`. Para os outros a página responde 404, e as regras do banco também bloqueiam a escrita.
+- Aula publicada não pode ser apagada: primeiro despublica, depois apaga (com confirmação). Apagar remove o progresso dos alunos naquela aula.
+- **Cadastrar aluno novo** exige a variável `SUPABASE_SECRET_KEY` na Vercel (Supabase → Project Settings → API Keys → secret key, ou a antiga service_role). Tipo **Secret**, **sem** prefixo `NEXT_PUBLIC_`. Ela só é usada no servidor, dentro da ação de admin. Reativar ou bloquear quem já existe não precisa dela.
+- No modo demo o painel funciona, mas as mudanças ficam só na memória do servidor.
+
 ## Vídeos das aulas
 
 `lessons.video_provider` + `lessons.video_id`:
@@ -60,6 +82,5 @@ Sem Supabase ainda: `DEMO_MODE=1 npm run dev` mostra a área com os dados do lay
 ## Próximas etapas
 
 - Webhook da plataforma de pagamento criando usuário + matrícula (Edge Function com `service_role`).
-- Painel admin para cadastrar módulos, aulas, lives e matrículas.
 - Progresso por tempo assistido (eventos do player) em vez do botão "concluída".
 - Gerar tipos do banco (`supabase gen types`) e substituir os textos `[placeholder]` do seed pelo conteúdo real.

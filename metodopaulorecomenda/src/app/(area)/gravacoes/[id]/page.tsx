@@ -11,7 +11,7 @@ export default async function GravacaoPage({ params }: { params: Promise<{ id: s
   const rec = data.lives.find((l) => l.id === id && l.status === "encerrada");
   if (!rec) notFound();
   return (
-    <div className="container page-pad" style={{ maxWidth: 1100 }}>
+    <div className="container page-pad">
       <nav className="breadcrumb" aria-label="Você está em">
         <Link href="/gravacoes">Gravações</Link> <ChevronRightIcon size={12} /> <span>{formatDate(rec.startsAt)}</span>
       </nav>

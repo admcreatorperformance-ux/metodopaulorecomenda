@@ -31,7 +31,7 @@ export const loadAreaData = cache(async (): Promise<AreaData> => {
   void supabase.rpc("touch_last_seen");
 
   const [profileRes, modulesRes, progressRes, livesRes, remindersRes, membersRes, settingsRes] = await Promise.all([
-    supabase.from("profiles").select("id, full_name, role").eq("id", userId).single(),
+    supabase.from("profiles").select("id, full_name, role, avatar_url").eq("id", userId).single(),
     supabase
       .from("modules")
       .select(
@@ -112,7 +112,7 @@ export const loadAreaData = cache(async (): Promise<AreaData> => {
 
   const profile = profileRes.data!;
   return {
-    viewer: { id: profile.id, fullName: profile.full_name, role: profile.role as Role },
+    viewer: { id: profile.id, fullName: profile.full_name, role: profile.role as Role, avatarUrl: profile.avatar_url ?? null },
     modules,
     progress,
     lives,
