@@ -17,11 +17,14 @@ export function Hero({ mod, lesson, percent, started }: { mod: Module; lesson: L
   return (
     <section className="hero" aria-labelledby="hero-title">
       <div className="hero__bg" />
-      <div className="hero__glow" />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className="hero__band" src="/brand/faixa-sinal.svg" alt="" />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className="hero__photo" src="/img/paulo-hero.webp" alt="" fetchPriority="high" />
+      <div className="hero__visual" aria-hidden="true">
+        <div className="hero__glow" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="hero__band" src="/brand/faixa-sinal.svg" alt="" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="hero__photo" src="/img/paulo-hero.webp" alt="" fetchPriority="high" />
+      </div>
+      <div className="hero__scrim" />
       <div className="hero__fade" />
       <div className="container hero__content">
         <span className="chip">{started ? "Continue de onde parou" : "Comece por aqui"}</span>

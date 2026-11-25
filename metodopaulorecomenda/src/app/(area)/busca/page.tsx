@@ -17,13 +17,13 @@ export default async function BuscaPage({ searchParams }: { searchParams: Promis
     : [];
 
   return (
-    <div className="container page-pad" style={{ maxWidth: 900 }}>
+    <div className="container page-pad">
       <h1 className="page-title">Buscar aulas</h1>
-      <form action="/busca" className="search" role="search" style={{ marginTop: 24 }}>
+      <form action="/busca" className="search" role="search" style={{ marginTop: 24, maxWidth: 720 }}>
         <label htmlFor="busca-pagina" className="sr-only">
           Buscar aulas
         </label>
-        <input id="busca-pagina" name="q" type="search" defaultValue={q} placeholder="Ex.: roteiro, produto, gancho" style={{ width: "100%", height: 52, paddingLeft: 20 }} />
+        <input id="busca-pagina" name="q" type="search" defaultValue={q} autoFocus={!q} placeholder="Ex.: roteiro, produto, gancho" style={{ width: "100%", height: 52, paddingLeft: 20 }} />
       </form>
       {term && (
         <p className="meta" style={{ margin: "20px 0 12px" }}>

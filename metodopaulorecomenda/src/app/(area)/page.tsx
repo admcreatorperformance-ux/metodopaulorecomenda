@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Carousel } from "@/components/carousel";
 import { CommunityBanner } from "@/components/community-banner";
 import { CommunityPanel } from "@/components/community-panel";
 import { Hero } from "@/components/hero";
@@ -46,11 +47,11 @@ export default async function InicioPage() {
                 <h2 id="continue-title" className="section-title">
                   Continue <span className="accent-pink">assistindo</span>
                 </h2>
-                <Link href="/modulos" className="section-link">
+                <Link href="/historico" className="section-link">
                   Ver histórico <ChevronRightIcon />
                 </Link>
               </div>
-              <div className="rail rail--3">
+              <Carousel className="rail rail--3" label="Continue assistindo">
                 {watching.map((l) => {
                   const m = modOf(l.moduleId);
                   return (
@@ -65,7 +66,7 @@ export default async function InicioPage() {
                     />
                   );
                 })}
-              </div>
+              </Carousel>
             </section>
           )}
 
@@ -78,11 +79,11 @@ export default async function InicioPage() {
                 Ver todos os módulos <ChevronRightIcon />
               </Link>
             </div>
-            <div className="rail rail--pillars">
+            <Carousel className="rail rail--pillars" label="Os pilares do método">
               {data.modules.map((m) => (
                 <PillarCard key={m.id} mod={m} percent={moduleProgress(m, data.progress).percent} active={m.id === currentMod.id} />
               ))}
-            </div>
+            </Carousel>
           </section>
 
           <section aria-labelledby="aulas-title">
@@ -106,7 +107,7 @@ export default async function InicioPage() {
                   Ver todas <ChevronRightIcon />
                 </Link>
               </div>
-              <div className="rail rail--rec">
+              <Carousel className="rail rail--rec" label="Gravações das lives">
                 {recordings.slice(0, 6).map((r) => (
                   <VideoCard
                     key={r.id}
@@ -118,7 +119,7 @@ export default async function InicioPage() {
                     thumb={r.recordingThumbnailUrl}
                   />
                 ))}
-              </div>
+              </Carousel>
             </section>
           )}
         </div>

@@ -11,6 +11,7 @@ export interface Lesson {
   videoId: string | null;
   durationSeconds: number | null;
   thumbnailUrl: string | null;
+  published?: boolean;
 }
 
 export interface Module {
@@ -20,6 +21,7 @@ export interface Module {
   title: string;
   description: string;
   lessons: Lesson[];
+  published?: boolean;
 }
 
 export interface LessonProgress {
@@ -38,6 +40,8 @@ export interface LiveSession {
   recordingProvider: VideoProvider | null;
   recordingVideoId: string | null;
   recordingThumbnailUrl: string | null;
+  description?: string;
+  published?: boolean;
 }
 
 export interface Member {
@@ -54,6 +58,7 @@ export interface Viewer {
   id: string;
   fullName: string;
   role: Role;
+  avatarUrl: string | null;
 }
 
 export interface AreaData {
@@ -64,4 +69,44 @@ export interface AreaData {
   reminders: string[];
   members: Member[];
   communityUrl: string | null;
+}
+
+export interface AdminMember {
+  userId: string;
+  email: string;
+  fullName: string;
+  role: Role;
+  enrollmentStatus: "active" | "canceled" | "refunded" | "expired" | null;
+  expiresAt: string | null;
+  lastSeenAt: string | null;
+  createdAt: string;
+}
+
+export interface LessonMaterial {
+  id: string;
+  lessonId: string;
+  title: string;
+  kind: "link" | "file";
+  url: string | null;
+  storagePath: string | null;
+  position: number;
+}
+
+export interface LessonComment {
+  id: string;
+  lessonId: string;
+  userId: string;
+  parentId: string | null;
+  body: string;
+  createdAt: string;
+  authorName: string;
+  authorAvatar: string | null;
+  authorRole: Role;
+}
+
+export interface Certificate {
+  id: string;
+  fullName: string;
+  lessonsCompleted: number;
+  issuedAt: string;
 }

@@ -1,4 +1,4 @@
-import type { AreaData, LessonProgress, Module } from "./types";
+import type { AdminMember, AreaData, Certificate, LessonComment, LessonMaterial, LessonProgress, LiveSession, Module } from "./types";
 
 /**
  * Dados de demonstração (espelham supabase/seed.sql).
@@ -88,22 +88,54 @@ export function demoToggleReminder(liveId: string) {
   else demoState.reminders.add(liveId);
 }
 
+const L = (id: string, title: string, startsAt: string, status: LiveSession["status"], rec: boolean): LiveSession => ({
+  id, title, hostName: "Paulo Nesi", startsAt, status, joinUrl: null,
+  recordingProvider: rec ? "youtube" : null, recordingVideoId: null, recordingThumbnailUrl: null,
+  description: "", published: true,
+});
+
+/** Estado em memória do modo demo: o painel admin edita estes dados (some ao reiniciar). */
+export const demoStore = {
+  modules: modules.map((m) => ({ ...m, published: true, lessons: m.lessons.map((l) => ({ ...l, published: true })) })),
+  lives: [
+    L("l0", "Mentoria semanal: análise dos vídeos dos alunos", minutesAgo(10), "ao_vivo", false),
+    L("l1", "Tira-dúvidas da semana", daysFromNow(2), "agendada", false),
+    L("l2", "Análise de vídeos dos alunos", daysFromNow(5), "agendada", false),
+    L("l3", "Produtos da semana", daysFromNow(8), "agendada", false),
+    L("g1", "Mentoria: revisão de perfis", daysFromNow(-7), "encerrada", true),
+    L("g2", "Tira-dúvidas sobre afiliação", daysFromNow(-14), "encerrada", true),
+    L("g3", "Análise de produtos ao vivo", daysFromNow(-21), "encerrada", true),
+    L("g4", "Roteiros [título completo]", daysFromNow(-28), "encerrada", true),
+  ] as LiveSession[],
+  members: [
+    { userId: "u1", email: "paulo@exemplo.com", fullName: "Paulo Nesi", role: "admin", enrollmentStatus: null, expiresAt: null, lastSeenAt: minutesAgo(1), createdAt: minutesAgo(90000) },
+    { userId: "u3", email: "aluna1@exemplo.com", fullName: "Aluna Exemplo", role: "aluno", enrollmentStatus: "active", expiresAt: null, lastSeenAt: minutesAgo(30), createdAt: minutesAgo(40000) },
+    { userId: "u4", email: "aluno2@exemplo.com", fullName: "Aluno Exemplo", role: "aluno", enrollmentStatus: "refunded", expiresAt: null, lastSeenAt: minutesAgo(9000), createdAt: minutesAgo(30000) },
+  ] as AdminMember[],
+  communityUrl: null as string | null,
+  viewerName: "Você Convidado",
+  materials: [
+    { id: "mat1", lessonId: "m2-a3", title: "Planilha de testes de produto", kind: "link", url: "https://docs.google.com/spreadsheets/", storagePath: null, position: 1 },
+    { id: "mat2", lessonId: "m2-a3", title: "Checklist: vale testar?", kind: "file", url: null, storagePath: "m2-a3/checklist.pdf", position: 2 },
+  ] as LessonMaterial[],
+  comments: [
+    { id: "c1", lessonId: "m2-a3", userId: "u1", parentId: null, body: "Antes de testar, olha se o produto tem vídeo vendendo nos últimos 7 dias. Se ninguém está vendendo, ou é oportunidade ou é armadilha. Me conta aqui qual você escolheu.", createdAt: minutesAgo(600), authorName: "Paulo Nesi", authorAvatar: null, authorRole: "mentor" },
+    { id: "c2", lessonId: "m2-a3", userId: "u3", parentId: null, body: "Escolhi um mop giratório. Tem vídeo vendendo mas pouca gente fazendo.", createdAt: minutesAgo(300), authorName: "Aluna Exemplo", authorAvatar: null, authorRole: "aluno" },
+    { id: "c3", lessonId: "m2-a3", userId: "u1", parentId: "c2", body: "Boa escolha. Grava 3 ganchos diferentes e me mostra na live de quinta.", createdAt: minutesAgo(200), authorName: "Paulo Nesi", authorAvatar: null, authorRole: "mentor" },
+  ] as LessonComment[],
+  certificate: null as Certificate | null,
+};
+
 export function getDemoData(): AreaData {
   return {
-    viewer: { id: "demo", fullName: "Você Convidado", role: "aluno" },
-    modules,
+    viewer: { id: "demo", fullName: demoStore.viewerName, role: "admin", avatarUrl: null },
+    modules: demoStore.modules
+      .filter((m) => m.published)
+      .sort((a, b) => a.position - b.position)
+      .map((m) => ({ ...m, lessons: m.lessons.filter((l) => l.published).sort((a, b) => a.position - b.position) })),
     progress: { ...demoState.progress },
     reminders: [...demoState.reminders],
-    lives: [
-      { id: "l0", title: "Mentoria semanal: análise dos vídeos dos alunos", hostName: "Paulo Nesi", startsAt: minutesAgo(10), status: "ao_vivo", joinUrl: null, recordingProvider: null, recordingVideoId: null, recordingThumbnailUrl: null },
-      { id: "l1", title: "Tira-dúvidas da semana", hostName: "Paulo Nesi", startsAt: daysFromNow(2), status: "agendada", joinUrl: null, recordingProvider: null, recordingVideoId: null, recordingThumbnailUrl: null },
-      { id: "l2", title: "Análise de vídeos dos alunos", hostName: "Paulo Nesi", startsAt: daysFromNow(5), status: "agendada", joinUrl: null, recordingProvider: null, recordingVideoId: null, recordingThumbnailUrl: null },
-      { id: "l3", title: "Produtos da semana", hostName: "Paulo Nesi", startsAt: daysFromNow(8), status: "agendada", joinUrl: null, recordingProvider: null, recordingVideoId: null, recordingThumbnailUrl: null },
-      { id: "g1", title: "Mentoria: revisão de perfis", hostName: "Paulo Nesi", startsAt: daysFromNow(-7), status: "encerrada", joinUrl: null, recordingProvider: "youtube", recordingVideoId: null, recordingThumbnailUrl: null },
-      { id: "g2", title: "Tira-dúvidas sobre afiliação", hostName: "Paulo Nesi", startsAt: daysFromNow(-14), status: "encerrada", joinUrl: null, recordingProvider: "youtube", recordingVideoId: null, recordingThumbnailUrl: null },
-      { id: "g3", title: "Análise de produtos ao vivo", hostName: "Paulo Nesi", startsAt: daysFromNow(-21), status: "encerrada", joinUrl: null, recordingProvider: "youtube", recordingVideoId: null, recordingThumbnailUrl: null },
-      { id: "g4", title: "Roteiros [título completo]", hostName: "Paulo Nesi", startsAt: daysFromNow(-28), status: "encerrada", joinUrl: null, recordingProvider: "youtube", recordingVideoId: null, recordingThumbnailUrl: null },
-    ],
+    lives: demoStore.lives.filter((l) => l.published).sort((a, b) => a.startsAt.localeCompare(b.startsAt)),
     members: [
       { id: "u1", fullName: "Paulo Nesi", avatarUrl: null, role: "mentor", online: true, currentModulePosition: null },
       { id: "u2", fullName: "[Nome do moderador]", avatarUrl: null, role: "moderador", online: true, currentModulePosition: null },
@@ -112,6 +144,6 @@ export function getDemoData(): AreaData {
       { id: "u5", fullName: "[Membro]", avatarUrl: null, role: "aluno", online: false, currentModulePosition: 5 },
       { id: "u6", fullName: "[Membro]", avatarUrl: null, role: "aluno", online: false, currentModulePosition: 1 },
     ],
-    communityUrl: null,
+    communityUrl: demoStore.communityUrl,
   };
 }

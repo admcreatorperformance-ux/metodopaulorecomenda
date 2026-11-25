@@ -1,19 +1,23 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Flash } from "@/components/admin/flash";
 import { CompleteButton } from "@/components/complete-button";
+import { Comments, MaterialsList } from "@/components/lesson-extras";
 import { CheckIcon, ChevronLeftIcon, ChevronRightIcon } from "@/components/icons";
 import { Player } from "@/components/player";
 import { findLesson, moduleProgress, pad2 } from "@/lib/course";
 import { loadAreaData } from "@/lib/data";
+import { loadLessonExtras } from "@/lib/extras";
 
-export default async function AulaPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function AulaPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; erro?: string }> }) {
+  const [{ id }, { ok, erro }] = await Promise.all([params, searchParams]);
   const data = await loadAreaData();
   const found = findLesson(data, id);
   if (!found) notFound();
   const { mod, lesson, prev, next } = found;
   const completed = Boolean(data.progress[lesson.id]?.completedAt);
   const { percent } = moduleProgress(mod, data.progress);
+  const { materials, comments } = await loadLessonExtras(lesson.id);
 
   return (
     <div className="container page-pad">
@@ -38,6 +42,10 @@ export default async function AulaPage({ params }: { params: Promise<{ id: strin
             <CompleteButton lessonId={lesson.id} completed={completed} />
           </div>
           {lesson.description && <p className="lesson-desc">{lesson.description}</p>}
+          <div style={{ marginTop: 20 }}>
+            <Flash ok={ok} erro={erro} />
+          </div>
+          <MaterialsList materials={materials} />
           <div className="lesson-nav">
             {prev ? (
               <Link href={`/aula/${prev.id}`}>
@@ -56,6 +64,7 @@ export default async function AulaPage({ params }: { params: Promise<{ id: strin
               </Link>
             )}
           </div>
+          <Comments lessonId={lesson.id} comments={comments} viewerId={data.viewer.id} viewerRole={data.viewer.role} />
         </div>
 
         <aside className="panel side-list" aria-label={`Aulas do módulo ${pad2(mod.position)}`}>
