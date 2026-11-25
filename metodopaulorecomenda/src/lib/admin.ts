@@ -103,6 +103,27 @@ export async function adminMembers(): Promise<AdminMember[]> {
   }));
 }
 
+export type WebhookEvent = { id: string; receivedAt: string; email: string | null; status: string | null; result: string; detail: string | null };
+
+/** Últimos avisos de venda recebidos (Greenn). Vazio no modo demo. */
+export async function adminWebhookEvents(limit = 15): Promise<WebhookEvent[]> {
+  const { supabase } = await requireAdmin();
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from("webhook_events")
+    .select("id, received_at, email, status, result, detail")
+    .order("received_at", { ascending: false })
+    .limit(limit);
+  return (data ?? []).map((e: Row) => ({
+    id: e.id as string,
+    receivedAt: e.received_at as string,
+    email: (e.email as string) ?? null,
+    status: (e.status as string) ?? null,
+    result: e.result as string,
+    detail: (e.detail as string) ?? null,
+  }));
+}
+
 export async function adminCommunityUrl(): Promise<string> {
   const { supabase } = await requireAdmin();
   if (!supabase) return demoStore.communityUrl ?? "";
