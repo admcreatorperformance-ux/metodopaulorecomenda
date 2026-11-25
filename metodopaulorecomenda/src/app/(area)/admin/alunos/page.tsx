@@ -1,12 +1,13 @@
 import { Flash } from "@/components/admin/flash";
-import { adminMembers } from "@/lib/admin";
+import { adminMembers, adminWebhookEvents } from "@/lib/admin";
 import { formatDate } from "@/lib/course";
 import { addMember, setEnrollment } from "../actions";
 
+const resultLabel: Record<string, string> = { liberado: "Acesso liberado", bloqueado: "Acesso bloqueado", ignorado: "Ignorado", erro: "Erro" };
 const statusLabel = { active: "Acesso ativo", canceled: "Cancelado", refunded: "Reembolsado", expired: "Expirado" } as const;
 
 export default async function AdminAlunos({ searchParams }: { searchParams: Promise<{ ok?: string; erro?: string; q?: string }> }) {
-  const [{ ok, erro, q = "" }, members] = await Promise.all([searchParams, adminMembers()]);
+  const [{ ok, erro, q = "" }, members, events] = await Promise.all([searchParams, adminMembers(), adminWebhookEvents()]);
   const term = q.trim().toLowerCase();
   const list = term ? members.filter((m) => `${m.email} ${m.fullName}`.toLowerCase().includes(term)) : members;
   const activeCount = members.filter((m) => m.enrollmentStatus === "active").length;
@@ -55,6 +56,24 @@ export default async function AdminAlunos({ searchParams }: { searchParams: Prom
               );
             })}
           </div>
+          <section className="admin-card" style={{ marginTop: 20 }} aria-labelledby="greenn-title">
+            <h2 id="greenn-title">Últimas vendas recebidas da Greenn</h2>
+            {events.length === 0 ? (
+              <p className="meta">Nenhum aviso recebido ainda. Depois de configurar o webhook, cada venda aprovada, reembolso ou chargeback aparece aqui.</p>
+            ) : (
+              <div className="admin-list">
+                {events.map((e) => (
+                  <div key={e.id} className="admin-row member-row">
+                    <div>
+                      <p className="admin-row__title" style={{ wordBreak: "break-all" }}>{e.email || "Sem e-mail"}</p>
+                      <p className="meta">{formatDate(e.receivedAt)} · status {e.status || "?"}{e.detail && e.result !== "liberado" && e.result !== "bloqueado" ? ` · ${e.detail}` : ""}</p>
+                    </div>
+                    <span className={`tag ${e.result === "liberado" ? "tag--on" : e.result === "erro" ? "tag--warn" : "tag--off"}`}>{resultLabel[e.result] ?? e.result}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
         </div>
         <form action={addMember} className="admin-card" id="novo">
           <h2>Liberar acesso</h2>

@@ -3,6 +3,8 @@ import { isDemo, supabaseConfigured } from "@/lib/env";
 import { updateSession } from "@/lib/supabase/proxy";
 
 export async function proxy(request: NextRequest) {
+  // Webhooks de pagamento: sem sessão; o próprio endpoint confere o token.
+  if (request.nextUrl.pathname.startsWith("/api/webhooks/")) return NextResponse.next();
   if (isDemo) return NextResponse.next();
   if (!supabaseConfigured) {
     // Sem Supabase e sem modo demo: nunca expor a área.

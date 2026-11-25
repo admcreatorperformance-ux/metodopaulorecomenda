@@ -79,6 +79,22 @@ Coluna lateral esquerda fixa no computador (grupos Estudar, Ao vivo, Conta + car
 - `bunny`: `<libraryId>/<videoId>`.
 - `panda`: URL completa de embed do painel da Panda.
 
+## Liberação automática pela Greenn
+
+Cada venda na Greenn avisa o site em `POST /api/webhooks/greenn?token=...`:
+
+| Status da Greenn | O que acontece |
+|---|---|
+| `paid` (venda) ou `paid`/`active` (assinatura) | Cria a conta do comprador (se não existir) e ativa a matrícula |
+| `refunded`, `chargedback` | Bloqueia (matrícula vira `refunded`) |
+| `canceled`, `ended` (assinatura) | Bloqueia (matrícula vira `canceled`) |
+| aguardando pagamento, recusada etc. | Não mexe no acesso |
+
+Configuração:
+1. Vercel → Environment Variables: `GREENN_WEBHOOK_TOKEN` (Secret, um texto longo aleatório) e, opcional, `GREENN_PRODUCT_IDS` (ids dos produtos da Greenn que dão acesso, separados por vírgula; vazio = todos). Precisa também de `SUPABASE_SECRET_KEY`. Redeploy.
+2. Greenn → Produtos → Meus Produtos → engrenagem → Editar Produto → Conteúdos → Adicionar Conteúdo → Sistema Externo → Webhook. URL: `https://SEU-SITE/api/webhooks/greenn?token=O_MESMO_TOKEN`. Eventos: venda paga, reembolso, chargeback (e cancelamento de assinatura, se for recorrente).
+3. Cada aviso fica registrado em `webhook_events` e aparece em Admin → Alunos → "Últimas vendas recebidas da Greenn".
+
 ## Próximas etapas
 
 - Webhook da plataforma de pagamento criando usuário + matrícula (Edge Function com `service_role`).
